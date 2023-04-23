@@ -1,0 +1,16 @@
+steps:
+  - name: Retrieve MySQL credentials from AWS Secrets Manager using Vault
+    image: hashicorp/vault:latest
+    commands:
+      - export VAULT_ADDR=<vault-address>
+      - export AWS_REGION=<aws-region>
+      - export AWS_ACCESS_KEY_ID=<aws-access-key-id>
+      - export AWS_SECRET_ACCESS_KEY=<aws-secret-access-key>
+      - export AWS_SESSION_TOKEN=<aws-session-token>
+      - export MYSQL_USERNAME=$(vault read -field=username aws/secretsmanager/mysql-credentials)
+      - export MYSQL_PASSWORD=$(vault read -field=password aws/secretsmanager/mysql-credentials)
+
+  - name: Connect to MySQL database
+    image: mysql:latest
+    commands:
+      - mysql -h <mysql-host> -u $MYSQL_USERNAME -p$MYSQL_PASSWORD -e "SELECT * FROM <table-name>"
